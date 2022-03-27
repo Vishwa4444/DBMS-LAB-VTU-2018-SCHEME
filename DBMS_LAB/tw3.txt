@@ -1,0 +1,135 @@
+
+
+create table actor(
+act_id number(5) primary key,
+act_name varchar(20),
+act_gender varchar(20)
+);
+
+create table director(
+dir_id number(5) primary key,
+dir_name varchar(20),
+dir_phone varchar(20)
+);
+
+create table movies(
+mov_id number(5) primary key ,
+mov_title varchar(10),
+mov_year number(5),
+mov_lang varchar(10),
+dir_id references director(dir_id)
+on delete cascade
+);
+
+create table movie_cast(
+act_id references actor(act_id)
+on delete cascade,
+mov_id references movies(mov_id)
+on delete cascade,
+role varchar(10),
+primary key(act_id,mov_id)
+);
+
+create table rating(
+mov_id references movies(mov_id)
+on delete cascade,
+rev_stars number(5),
+primary key(mov_id)
+);
+
+
+insert into actor  values(1,'amir','m');
+insert into actor  values(2,'iyer','m');
+insert into actor  values(3,'jetha','m');
+insert into actor  values(4,'tappu','m');
+
+insert into director  values(11,'d1','9482860167');
+insert into director  values(12,'d2','7482860167');
+insert into director  values(13,'d3','8482860167');
+insert into director  values(14,'d4','6482860167');
+
+insert into movies values(111,'I','2001','telgu',11);
+insert into movies values(112,'sid','2005','hindi',11);
+insert into movies values(113,'jeet','2007','hindi',11);
+insert into movies values(114,'tiger','2005','hindi',11);
+insert into movies values(115,'pk','2016','hindi',11);
+insert into movies values(116,'kite','2017','hindi',12);
+insert into movies values(117,'kgf','2017','hindi',13);
+insert into movies values(118,'mca','2019','telgu',14);
+insert into movies values(119,'mca1','1996','telgu',14);
+
+
+
+insert into movie_cast values(1,111,'hero');
+insert into movie_cast values(2,113,'comedy');
+insert into movie_cast values(3,113,'cmedy');
+insert into movie_cast values(4,112,'villan');
+insert into movie_cast values(3,117,'hero');
+
+
+
+insert into rating values(111,4);
+insert into rating values(113,3);
+insert into rating values(112,5);
+insert into rating values(117,2);
+
+QUERIES:
+
+1)
+select mov_title 
+from director d,movies m
+where d.dir_id=m.dir_id and
+            d.dir_name='d1';
+
+
+2)
+
+select m.mov_id,m.mov_title,mc.act_id
+from movies m,movie_cast mc
+where m.mov_id=mc.mov_id and
+mc.act_id in
+(select act_id
+from movie_cast mc
+group by act_id
+having count(*)>1);
+
+3)
+
+
+SELECT ACT_NAME, MOV_TITLE, MOV_YEAR
+FROM ACTOR A
+JOIN MOVIE_CAST C ON
+A.ACT_ID=C.ACT_ID
+JOIN MOVIES M ON
+C.MOV_ID=M.MOV_ID
+WHERE M.MOV_YEAR NOT BETWEEN 2000 AND 2015;
+
+OR////////////////////OR
+
+select act_name  from actor a,movie_cast b,movies c
+where a.act_id=b.act_id and
+b.mov_id=c.mov_id and 
+c.mov_year not between '2001' and '2015';
+
+4)
+
+select mov_title,max(rev_stars) from movies m,  rating r  where m.mov_id=r.mov_id 
+group by mov_title having max(rev_stars)>0
+order by mov_title;
+
+5)
+update rating
+set rev_stars=6
+where mov_id in
+
+ (select mov_id from movies
+where dir_id in(
+
+select dir_id from director
+where dir_name='d3'));
+
+
+
+
+
+

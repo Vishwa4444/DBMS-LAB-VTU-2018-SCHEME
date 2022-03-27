@@ -1,0 +1,125 @@
+CREATE TABLE publisher(
+name varchar(20) primary key,
+address varchar(20),
+phone INTEGER
+);
+
+CREATE TABLE book(
+book_id INTEGER primary key,
+title varchar(20),
+pub_year varchar(20),
+publisher_name references publisher(name)
+on delete cascade
+);
+
+CREATE TABLE book_authors(
+author_name varchar(20),
+book_id references book(book_id)
+on delete cascade,
+primary key(book_id,author_name)
+);
+
+CREATE TABLE library_program(
+program_id INTEGER primary key,
+program_name varchar(44),
+address varchar(20)
+);
+
+CREATE TABLE book_copies(
+book_id references book(book_id)
+on delete cascade,
+program_id references library_program(program_id)
+on delete cascade,
+no_copies INTEGER,
+primary key(book_id,program_id)
+);
+
+CREATE TABLE card(
+card_no INTEGER primary key);
+
+CREATE TABLE book_lending(
+book_id references book(book_id)
+on delete cascade,
+program_id references library_program(program_id)
+on delete cascade,
+card_no INTEGER,
+date_out date,
+due_date date,
+primary key(book_id,program_id,card_no)
+);
+
+insert into publisher values('vishwa','belgaum',9482860167);
+insert into publisher values('vinayak','hubli',9567876869);
+insert into publisher values('vishal','goa',9897900297);
+insert into publisher values('virat','banglore',9148549116);
+
+insert into book values(101,'eat that frog',1990,'vishal');
+insert into book values(102,'Think and grow rich',2000,'virat');
+insert into book values(103,'rework',2002,'vishwa');
+insert into book values(104,'the art',2023,'vishwa');
+
+insert into book_authors values('aman',104);
+insert into book_authors values('anosh',103);
+insert into book_authors values('anthony',101);
+insert into book_authors values('amar',102);
+
+insert into library_program values(1,'p1','hubli');
+insert into library_program values(2,'p2','goa');
+insert into library_program values(3,'p3','belgaum');
+insert into library_program values(4,'p4','dharwad');
+
+insert into book_copies values(101,1,7);
+insert into book_copies values(102,2,6);
+insert into book_copies values(103,4,7);
+insert into book_copies values(104,3,9);
+
+
+insert into card values(10);
+insert into card values(11);
+insert into card values(12);
+insert into card values(13);
+
+
+insert into book_lending values(102,1,10,'10-jan-2021','20-aug-2021');
+insert into book_lending values(103,2,11,'9-jul-2021','12-aug-2021');
+insert into book_lending values(104,4,10,'11-apr-2021','9-aug-2021');
+insert into book_lending values(102,1,13,'9-aug-2021','19-aug-2021');
+insert into book_lending values(104,3,10,'10-jun-2021','15-jun-2021');
+insert into book_lending values(101,1,10,'12-may-2021','10-jun-2021');
+insert into book_lending values(103,2,10,'10-jul-2021','15-jul-2021');
+
+
+
+queries
+1)
+
+select lp.program_name,b.book_id,title,publisher_name,author_name,no_copies
+from book b,book_authors ba,book_copies bc,library_program lp
+where b.book_id=ba.book_id and ba.book_id=bc.book_id and bc.program_id=lp.program_id
+group by lp.program_name,b.book_id,title,publisher_name,author_name,no_copies;
+
+2)
+
+select card_no,count(card_no) from book_lending 
+where date_out between '1-jan-2021' and '30-jun-2021'
+group by card_no
+having count(*)>3;
+
+3)
+
+delete from book
+where book_id='103';
+
+4)
+
+create view YearOfPublication2001 as
+select book_id,pub_year
+from book;
+
+5)
+
+create view books_available as 
+select b.book_id,title,c.no_copies
+from book b,book_copies c ,library_program l
+where b.book_id=c.book_id and 
+      c.program_id=l.program_id; 
